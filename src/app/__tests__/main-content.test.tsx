@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { MainContent } from "../main-content";
 
@@ -25,111 +26,135 @@ vi.mock("@/components/HeaderActions", () => ({
 
 vi.mock("@/lib/contexts/file-system-context", () => ({
   FileSystemProvider: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
+    <>{children}</>
   ),
 }));
 
 vi.mock("@/lib/contexts/chat-context", () => ({
   ChatProvider: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
+    <>{children}</>
   ),
 }));
 
+// Mock resizable components to simplify DOM structure
+vi.mock("@/components/ui/resizable", () => ({
+  ResizablePanelGroup: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="resizable-panel-group">{children}</div>
+  ),
+  ResizablePanel: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="resizable-panel">{children}</div>
+  ),
+  ResizableHandle: () => <div data-testid="resizable-handle" />,
+}));
+
 describe("MainContent Toggle Buttons", () => {
+  // Get the first MainContent instance and scope all queries to it
+  const getMainContent = () => {
+    return within(screen.getAllByTestId("main-content")[0]);
+  };
+
   it("should start with preview view by default", () => {
     render(<MainContent />);
+    const container = getMainContent();
 
-    const previewContainer = screen.getByTestId("preview-frame").parentElement;
-    const codeContainer = screen.getByTestId("file-tree").parentElement?.parentElement?.parentElement;
+    const previewContainer = container.getByTestId("preview-view-container");
+    const codeContainer = container.getByTestId("code-view-container");
 
     expect(previewContainer).not.toHaveClass("hidden");
     expect(codeContainer).toHaveClass("hidden");
   });
 
-  it("should toggle to code view when Code button is clicked", () => {
+  it("should toggle to code view when Code button is clicked", async () => {
+    const user = userEvent.setup();
     render(<MainContent />);
+    const container = getMainContent();
 
-    const codeButton = screen.getByRole("tab", { name: /code/i });
-    fireEvent.click(codeButton);
+    const codeButton = container.getByRole("tab", { name: /code/i });
+    await user.click(codeButton);
 
-    const previewContainer = screen.getByTestId("preview-frame").parentElement;
-    const codeContainer = screen.getByTestId("file-tree").parentElement?.parentElement?.parentElement;
+    const previewContainer = container.getByTestId("preview-view-container");
+    const codeContainer = container.getByTestId("code-view-container");
 
     expect(previewContainer).toHaveClass("hidden");
     expect(codeContainer).not.toHaveClass("hidden");
   });
 
-  it("should toggle back to preview when Preview button is clicked", () => {
+  it("should toggle back to preview when Preview button is clicked", async () => {
+    const user = userEvent.setup();
     render(<MainContent />);
+    const container = getMainContent();
 
-    const codeButton = screen.getByRole("tab", { name: /code/i });
-    const previewButton = screen.getByRole("tab", { name: /preview/i });
+    const codeButton = container.getByRole("tab", { name: /code/i });
+    const previewButton = container.getByRole("tab", { name: /preview/i });
 
     // Switch to code view
-    fireEvent.click(codeButton);
+    await user.click(codeButton);
 
     // Switch back to preview
-    fireEvent.click(previewButton);
+    await user.click(previewButton);
 
-    const previewContainer = screen.getByTestId("preview-frame").parentElement;
-    const codeContainer = screen.getByTestId("file-tree").parentElement?.parentElement?.parentElement;
+    const previewContainer = container.getByTestId("preview-view-container");
+    const codeContainer = container.getByTestId("code-view-container");
 
     expect(previewContainer).not.toHaveClass("hidden");
     expect(codeContainer).toHaveClass("hidden");
   });
 
-  it("should toggle multiple times correctly", () => {
+  it("should toggle multiple times correctly", async () => {
+    const user = userEvent.setup();
     render(<MainContent />);
+    const container = getMainContent();
 
-    const codeButton = screen.getByRole("tab", { name: /code/i });
-    const previewButton = screen.getByRole("tab", { name: /preview/i });
+    const codeButton = container.getByRole("tab", { name: /code/i });
+    const previewButton = container.getByRole("tab", { name: /preview/i });
 
-    const getContainers = () => {
-      const previewContainer = screen.getByTestId("preview-frame").parentElement;
-      const codeContainer = screen.getByTestId("file-tree").parentElement?.parentElement?.parentElement;
-      return { previewContainer, codeContainer };
-    };
+    const getContainers = () => ({
+      previewContainer: container.getByTestId("preview-view-container"),
+      codeContainer: container.getByTestId("code-view-container"),
+    });
 
     // Click code
-    fireEvent.click(codeButton);
+    await user.click(codeButton);
     let { previewContainer, codeContainer } = getContainers();
     expect(previewContainer).toHaveClass("hidden");
     expect(codeContainer).not.toHaveClass("hidden");
 
     // Click preview
-    fireEvent.click(previewButton);
+    await user.click(previewButton);
     ({ previewContainer, codeContainer } = getContainers());
     expect(previewContainer).not.toHaveClass("hidden");
     expect(codeContainer).toHaveClass("hidden");
 
     // Click code again
-    fireEvent.click(codeButton);
+    await user.click(codeButton);
     ({ previewContainer, codeContainer } = getContainers());
     expect(previewContainer).toHaveClass("hidden");
     expect(codeContainer).not.toHaveClass("hidden");
 
     // Click preview again
-    fireEvent.click(previewButton);
+    await user.click(previewButton);
     ({ previewContainer, codeContainer } = getContainers());
     expect(previewContainer).not.toHaveClass("hidden");
     expect(codeContainer).toHaveClass("hidden");
   });
 
-  it("should keep both views mounted in DOM at all times", () => {
+  it("should keep both views mounted in DOM at all times", async () => {
+    const user = userEvent.setup();
     render(<MainContent />);
+    const container = getMainContent();
 
     // Both views should be in DOM regardless of active view
-    expect(screen.getByTestId("preview-frame")).toBeInTheDocument();
-    expect(screen.getByTestId("file-tree")).toBeInTheDocument();
-    expect(screen.getByTestId("code-editor")).toBeInTheDocument();
+    expect(container.getByTestId("preview-frame")).toBeInTheDocument();
+    expect(container.getByTestId("file-tree")).toBeInTheDocument();
+    expect(container.getByTestId("code-editor")).toBeInTheDocument();
 
     // Toggle to code view
-    const codeButton = screen.getByRole("tab", { name: /code/i });
-    fireEvent.click(codeButton);
+    const codeButton = container.getByRole("tab", { name: /code/i });
+    await user.click(codeButton);
 
     // Both views should still be in DOM
-    expect(screen.getByTestId("preview-frame")).toBeInTheDocument();
-    expect(screen.getByTestId("file-tree")).toBeInTheDocument();
-    expect(screen.getByTestId("code-editor")).toBeInTheDocument();
+    expect(container.getByTestId("preview-frame")).toBeInTheDocument();
+    expect(container.getByTestId("file-tree")).toBeInTheDocument();
+    expect(container.getByTestId("code-editor")).toBeInTheDocument();
   });
 });

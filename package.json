@@ -2,6 +2,7 @@
   "name": "uigen",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "dev:daemon": "next dev --turbopack > logs.txt 2>&1 & echo 'Server started, writing logs to logs.txt'",
@@ -9,7 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
-    "setup": "npm install && npx prisma generate && npx prisma migrate dev",
+    "setup": "npm install && node ./scripts/init-claude.js && npx prisma generate && npx prisma migrate dev",
     "db:reset": "npx prisma migrate reset --force"
   },
   "dependencies": {
@@ -45,6 +46,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/babel__standalone": "^7.1.9",

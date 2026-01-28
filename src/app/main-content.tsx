@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -36,7 +37,7 @@ export function MainContent({ user, project }: MainContentProps) {
   return (
     <FileSystemProvider initialData={project?.data}>
       <ChatProvider projectId={project?.id} initialMessages={project?.messages}>
-        <div className="h-screen w-screen overflow-hidden bg-neutral-50">
+        <div data-testid="main-content" className="h-screen w-screen overflow-hidden bg-neutral-50">
           <ResizablePanelGroup id="main-layout" direction="horizontal" className="h-full">
             {/* Left Panel - Chat */}
             <ResizablePanel id="chat-panel" defaultSize={35} minSize={25} maxSize={50}>
@@ -77,12 +78,12 @@ export function MainContent({ user, project }: MainContentProps) {
                 {/* Content Area */}
                 <div className="flex-1 overflow-hidden bg-neutral-50">
                   {/* Preview View */}
-                  <div className={`h-full bg-white ${activeView === "preview" ? "" : "hidden"}`}>
+                  <div data-testid="preview-view-container" className={cn("h-full bg-white", activeView !== "preview" && "hidden")}>
                     <PreviewFrame />
                   </div>
 
                   {/* Code View */}
-                  <div className={`h-full ${activeView === "code" ? "" : "hidden"}`}>
+                  <div data-testid="code-view-container" className={cn("h-full", activeView !== "code" && "hidden")}>
                     <ResizablePanelGroup
                       id="code-layout"
                       direction="horizontal"
