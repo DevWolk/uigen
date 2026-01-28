@@ -1,8 +1,12 @@
 import { Loader2, FilePlus, FileEdit, FileSearch, Trash2, ArrowRightLeft, FileInput } from "lucide-react";
-import type { ToolInvocation } from "ai";
-
 interface ToolInvocationBadgeProps {
-  toolInvocation: ToolInvocation;
+  toolInvocation: {
+    toolCallId: string;
+    toolName: string;
+    args: Record<string, unknown>;
+    state: string;
+    result?: unknown;
+  };
 }
 
 interface ToolArgs {

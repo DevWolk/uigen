@@ -1,13 +1,13 @@
 "use client";
 
-import { Message } from "ai";
+import { UIMessage } from "ai";
 import { cn } from "@/lib/utils";
 import { User, Bot, Loader2 } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { ToolInvocationBadge } from "./ToolInvocationBadge";
 
 interface MessageListProps {
-  messages: Message[];
+  messages: UIMessage[];
   isLoading?: boolean;
 }
 
@@ -29,7 +29,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
       <div className="space-y-6 max-w-4xl mx-auto w-full">
         {messages.map((message) => (
           <div
-            key={message.id || message.content}
+            key={message.id}
             className={cn(
               "flex gap-4",
               message.role === "user" ? "justify-end" : "justify-start"
@@ -54,69 +54,63 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                   : "bg-white text-neutral-900 border border-neutral-200 shadow-sm"
               )}>
                 <div className="text-sm">
-                  {message.parts ? (
-                    <>
-                      {message.parts.map((part, partIndex) => {
-                        switch (part.type) {
-                          case "text":
-                            return message.role === "user" ? (
-                              <span key={partIndex} className="whitespace-pre-wrap">{part.text}</span>
-                            ) : (
-                              <MarkdownRenderer
-                                key={partIndex}
-                                content={part.text}
-                                className="prose-sm"
-                              />
-                            );
-                          case "reasoning":
-                            return (
-                              <div key={partIndex} className="mt-3 p-3 bg-white/50 rounded-md border border-neutral-200">
-                                <span className="text-xs font-medium text-neutral-600 block mb-1">Reasoning</span>
-                                <span className="text-sm text-neutral-700">{part.reasoning}</span>
-                              </div>
-                            );
-                          case "tool-invocation":
-                            return (
-                              <ToolInvocationBadge
-                                key={partIndex}
-                                toolInvocation={part.toolInvocation}
-                              />
-                            );
-                          case "source":
-                            return (
-                              <div key={partIndex} className="mt-2 text-xs text-neutral-500">
-                                Source: {JSON.stringify(part.source)}
-                              </div>
-                            );
-                          case "step-start":
-                            return partIndex > 0 ? <hr key={partIndex} className="my-3 border-neutral-200" /> : null;
-                          default:
-                            return null;
-                        }
-                      })}
-                      {isLoading &&
-                        message.role === "assistant" &&
-                        messages.indexOf(message) === messages.length - 1 && (
-                          <div className="flex items-center gap-2 mt-3 text-neutral-500">
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                            <span className="text-sm">Generating...</span>
-                          </div>
-                        )}
-                    </>
-                  ) : message.content ? (
-                    message.role === "user" ? (
-                      <span className="whitespace-pre-wrap">{message.content}</span>
-                    ) : (
-                      <MarkdownRenderer content={message.content} className="prose-sm" />
-                    )
-                  ) : isLoading &&
+                  {message.parts.map((part, partIndex) => {
+                    if (part.type === "text") {
+                      return message.role === "user" ? (
+                        <span key={partIndex} className="whitespace-pre-wrap">{part.text}</span>
+                      ) : (
+                        <MarkdownRenderer
+                          key={partIndex}
+                          content={part.text}
+                          className="prose-sm"
+                        />
+                      );
+                    }
+                    if (part.type === "reasoning") {
+                      return (
+                        <div key={partIndex} className="mt-3 p-3 bg-white/50 rounded-md border border-neutral-200">
+                          <span className="text-xs font-medium text-neutral-600 block mb-1">Reasoning</span>
+                          <span className="text-sm text-neutral-700">{part.text}</span>
+                        </div>
+                      );
+                    }
+                    if (part.type.startsWith("tool-") || part.type === "dynamic-tool") {
+                      const toolPart = part as any;
+                      return (
+                        <ToolInvocationBadge
+                          key={partIndex}
+                          toolInvocation={{
+                            toolCallId: toolPart.toolCallId,
+                            toolName: toolPart.toolName || part.type.replace("tool-", ""),
+                            args: toolPart.input || toolPart.args || {},
+                            state: toolPart.state === "error" ? "result" : toolPart.state || "result",
+                            result: toolPart.output || toolPart.result,
+                          }}
+                        />
+                      );
+                    }
+                    if (part.type === "source-url" || part.type === "source-document") {
+                      const sourcePart = part as any;
+                      return (
+                        <div key={partIndex} className="mt-2 text-xs text-neutral-500">
+                          Source: {sourcePart.title || sourcePart.url || sourcePart.filename}
+                        </div>
+                      );
+                    }
+                    if (part.type === "step-start") {
+                      return partIndex > 0 ? <hr key={partIndex} className="my-3 border-neutral-200" /> : null;
+                    }
+                    return null;
+                  })}
+                  {isLoading &&
                     message.role === "assistant" &&
-                    messages.indexOf(message) === messages.length - 1 ? (
-                    <div className="flex items-center gap-2 text-neutral-500">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      <span className="text-sm">Generating...</span>
-                    </div>
-                  ) : null}
+                    messages.indexOf(message) === messages.length - 1 &&
+                    message.parts.length === 0 && (
+                      <div className="flex items-center gap-2 text-neutral-500">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        <span className="text-sm">Generating...</span>
+                      </div>
+                    )}
                 </div>
               </div>
             </div>

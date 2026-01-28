@@ -1,11 +1,18 @@
 import { test, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { ToolInvocationBadge } from "../ToolInvocationBadge";
-import type { ToolInvocation } from "ai";
 
 afterEach(() => {
   cleanup();
 });
+
+interface ToolInvocation {
+  toolCallId: string;
+  toolName: string;
+  args: Record<string, unknown>;
+  state: string;
+  result?: unknown;
+}
 
 function createToolInvocation(
   toolName: string,
