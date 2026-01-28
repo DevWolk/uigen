@@ -16,7 +16,7 @@ export async function createProject(input: CreateProjectInput) {
     throw new Error("Unauthorized");
   }
 
-  const project = await prisma.project.create({
+  return prisma.project.create({
     data: {
       name: input.name,
       userId: session.userId,
@@ -24,6 +24,4 @@ export async function createProject(input: CreateProjectInput) {
       data: JSON.stringify(input.data),
     },
   });
-
-  return project;
 }

@@ -19,7 +19,7 @@ vi.mock("@babel/standalone", () => ({
 }));
 
 // Mock URL.createObjectURL
-global.URL.createObjectURL = vi.fn((blob) => {
+global.URL.createObjectURL = vi.fn(() => {
   return `blob:mock-url-${Math.random()}`;
 });
 

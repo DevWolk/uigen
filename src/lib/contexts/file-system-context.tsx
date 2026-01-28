@@ -7,7 +7,7 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
-import { VirtualFileSystem, FileNode } from "@/lib/file-system";
+import { VirtualFileSystem } from "@/lib/file-system";
 
 interface ToolCall {
   toolName: string;

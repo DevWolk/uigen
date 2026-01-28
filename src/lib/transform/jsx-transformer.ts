@@ -23,7 +23,7 @@ export { ${componentName} };
 export function transformJSX(
   code: string,
   filename: string,
-  existingFiles: Set<string>
+  _existingFiles: Set<string>
 ): TransformResult {
   try {
     const isTypeScript = filename.endsWith(".ts") || filename.endsWith(".tsx");
@@ -222,8 +222,7 @@ export function createImportMap(files: Map<string, string>): ImportMapResult {
 
     if (isPackage) {
       // Handle third-party packages from esm.sh
-      const packageUrl = `https://esm.sh/${importPath}`;
-      imports[importPath] = packageUrl;
+      imports[importPath] = `https://esm.sh/${importPath}`;
       continue;
     }
 

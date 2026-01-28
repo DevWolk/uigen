@@ -171,7 +171,7 @@ test("FileTreeNode expands and collapses directories", () => {
     setSelectedFile: vi.fn(),
   });
 
-  const { container } = render(<FileTree />);
+  render(<FileTree />);
 
   // Initially expanded - should show child
   expect(screen.getByText("parent")).toBeDefined();
@@ -241,7 +241,7 @@ test("FileTreeNode highlights selected file", () => {
     setSelectedFile: vi.fn(),
   });
 
-  const { container } = render(<FileTree />);
+  render(<FileTree />);
 
   // Find the div containing the file name
   const fileDiv = screen.getByText("selected.js").parentElement;

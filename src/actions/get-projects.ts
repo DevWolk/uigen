@@ -10,7 +10,7 @@ export async function getProjects() {
     throw new Error("Unauthorized");
   }
 
-  const projects = await prisma.project.findMany({
+  return prisma.project.findMany({
     where: {
       userId: session.userId,
     },
@@ -24,6 +24,4 @@ export async function getProjects() {
       updatedAt: true,
     },
   });
-
-  return projects;
 }

@@ -41,19 +41,6 @@ export class MockLanguageModel implements LanguageModelV1 {
     return "";
   }
 
-  private getLastToolResult(messages: LanguageModelV1Message[]): any {
-    // Find the last tool message
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === "tool") {
-        const content = messages[i].content;
-        if (Array.isArray(content) && content.length > 0) {
-          return content[0];
-        }
-      }
-    }
-    return null;
-  }
-
   private async *generateMockStream(
     messages: LanguageModelV1Message[],
     userPrompt: string

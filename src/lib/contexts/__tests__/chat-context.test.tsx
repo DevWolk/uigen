@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, act, cleanup } from "@testing-library/react";
+import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import { ChatProvider, useChat } from "../chat-context";
 import { useFileSystem } from "../file-system-context";
 import { useChat as useAIChat } from "@ai-sdk/react";

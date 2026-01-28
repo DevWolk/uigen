@@ -110,7 +110,7 @@ export async function getUser() {
   }
 
   try {
-    const user = await prisma.user.findUnique({
+    return prisma.user.findUnique({
       where: { id: session.userId },
       select: {
         id: true,
@@ -118,8 +118,6 @@ export async function getUser() {
         createdAt: true,
       },
     });
-
-    return user;
   } catch (error) {
     console.error("Get user error:", error);
     return null;
