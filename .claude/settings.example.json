@@ -13,11 +13,11 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "true"
+            "command": "jq . >> post-log.json"
           }
         ]
       }

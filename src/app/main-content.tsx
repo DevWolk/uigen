@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   ResizableHandle,
@@ -33,6 +33,11 @@ interface MainContentProps {
 
 export function MainContent({ user, project }: MainContentProps) {
   const [activeView, setActiveView] = useState<"preview" | "code">("preview");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <FileSystemProvider initialData={project?.data}>
@@ -61,17 +66,24 @@ export function MainContent({ user, project }: MainContentProps) {
               <div className="h-full flex flex-col bg-white">
                 {/* Top Bar */}
                 <div className="h-14 border-b border-neutral-200/60 px-6 flex items-center justify-between bg-neutral-50/50">
-                  <Tabs
-                    value={activeView}
-                    onValueChange={(v) =>
-                      setActiveView(v as "preview" | "code")
-                    }
-                  >
-                    <TabsList className="bg-white/60 border border-neutral-200/60 p-0.5 h-9 shadow-sm">
-                      <TabsTrigger value="preview" className="data-[state=active]:bg-white data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm text-neutral-600 px-4 py-1.5 text-sm font-medium transition-all">Preview</TabsTrigger>
-                      <TabsTrigger value="code" className="data-[state=active]:bg-white data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm text-neutral-600 px-4 py-1.5 text-sm font-medium transition-all">Code</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+                  {mounted ? (
+                    <Tabs
+                      value={activeView}
+                      onValueChange={(v) =>
+                        setActiveView(v as "preview" | "code")
+                      }
+                    >
+                      <TabsList className="bg-white/60 border border-neutral-200/60 p-0.5 h-9 shadow-sm">
+                        <TabsTrigger value="preview" className="data-[state=active]:bg-white data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm text-neutral-600 px-4 py-1.5 text-sm font-medium transition-all">Preview</TabsTrigger>
+                        <TabsTrigger value="code" className="data-[state=active]:bg-white data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm text-neutral-600 px-4 py-1.5 text-sm font-medium transition-all">Code</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  ) : (
+                    <div className="bg-white/60 border border-neutral-200/60 p-0.5 h-9 shadow-sm rounded-lg flex">
+                      <div className="px-4 py-1.5 text-sm font-medium text-neutral-600">Preview</div>
+                      <div className="px-4 py-1.5 text-sm font-medium text-neutral-600">Code</div>
+                    </div>
+                  )}
                   <HeaderActions user={user} projectId={project?.id} />
                 </div>
 
